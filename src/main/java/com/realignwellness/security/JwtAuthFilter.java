@@ -31,6 +31,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
         String auth = req.getHeader("Authorization");
+
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
             try {
@@ -44,11 +45,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(user.getId(), null, auths);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    // user id from token not found
+                    req.setAttribute("auth_error", "UNKNOWN_USER");
                 }
-            } catch (JwtException e) {
-                // invalid token -> ignore, downstream will reject as unauthenticated
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                req.setAttribute("auth_error", "TOKEN_EXPIRED");
+            } catch (io.jsonwebtoken.security.SignatureException e) {
+            } catch (io.jsonwebtoken.JwtException e) {
+                req.setAttribute("auth_error", "INVALID_TOKEN");
             }
+        } else if (auth == null || auth.isBlank()) {
+            // No Authorization header
+            req.setAttribute("auth_error", "MISSING_TOKEN");
         }
+
         chain.doFilter(req, res);
     }
 }
