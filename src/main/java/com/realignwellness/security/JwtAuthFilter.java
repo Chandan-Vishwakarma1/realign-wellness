@@ -30,36 +30,48 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
+
         String auth = req.getHeader("Authorization");
 
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring(7);
-            try {
-                String userId = jwtService.getSubject(token);
-                Optional<User> opt = userRepo.findById(userId);
-                if (opt.isPresent()) {
-                    User user = opt.get();
-                    Set<GrantedAuthority> auths = user.getRoles().stream()
-                            .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
-                            .collect(Collectors.toSet());
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(user.getId(), null, auths);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    // user id from token not found
-                    req.setAttribute("auth_error", "UNKNOWN_USER");
+        try {
+            if (auth != null && auth.startsWith("Bearer ")) {
+                String token = auth.substring(7);
+                try {
+                    String userId = jwtService.getSubject(token);
+                    var userOpt = userRepo.findById(userId);
+                    if (userOpt.isPresent()) {
+                        var user = userOpt.get();
+                        var authorities = user.getRoles().stream()
+                                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
+                                .collect(Collectors.toSet());
+                        var authentication = new UsernamePasswordAuthenticationToken(user.getId(), null, authorities);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    } else {
+                        SecurityContextHolder.clearContext();
+                        req.setAttribute("auth_error", "UNKNOWN_USER");
+                    }
+                } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                    SecurityContextHolder.clearContext();
+                    req.setAttribute("auth_error", "TOKEN_EXPIRED");
+                } catch (io.jsonwebtoken.security.SignatureException e) {
+                    SecurityContextHolder.clearContext();
+                    req.setAttribute("auth_error", "BAD_SIGNATURE");
+                } catch (io.jsonwebtoken.MalformedJwtException e) {
+                    SecurityContextHolder.clearContext();
+                    req.setAttribute("auth_error", "MALFORMED_TOKEN");
+                } catch (io.jsonwebtoken.JwtException e) {
+                    SecurityContextHolder.clearContext();
+                    req.setAttribute("auth_error", "INVALID_TOKEN");
                 }
-            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                req.setAttribute("auth_error", "TOKEN_EXPIRED");
-            } catch (io.jsonwebtoken.security.SignatureException e) {
-            } catch (io.jsonwebtoken.JwtException e) {
-                req.setAttribute("auth_error", "INVALID_TOKEN");
+            } else {
+                // No header: leave unauthenticated and let entry point decide if endpoint requires auth
+                req.setAttribute("auth_error", "MISSING_TOKEN");
             }
-        } else if (auth == null || auth.isBlank()) {
-            // No Authorization header
-            req.setAttribute("auth_error", "MISSING_TOKEN");
-        }
 
-        chain.doFilter(req, res);
+            chain.doFilter(req, res);
+
+        } finally {
+            // do NOT write to response here; let entry point handle it
+        }
     }
 }
