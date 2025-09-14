@@ -3,13 +3,17 @@ package com.realignwellness.service;
 import com.realignwellness.entity.OtpToken;
 import com.realignwellness.entity.User;
 import com.realignwellness.repository.OtpTokenRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,12 +21,15 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 public class OtpService {
-    @Value("${app.otp.length}") private int length;
-    @Value("${app.otp.ttl-min}") private long ttlMin;
+    @Value("${app.otp.length}")
+    private int length;
+    @Value("${app.otp.ttl-min}")
+    private long ttlMin;
     private final OtpTokenRepository otpRepo;
     private final PasswordEncoder encoder;
     private final JavaMailSender mailSender;
-    @Value("${app.otp.email.subject}") private String subject;
+    @Value("${app.otp.email.subject}")
+    private String subject;
 
     public void sendLoginOtp(User user) {
         String otp = generateOtp();
@@ -34,7 +41,11 @@ public class OtpService {
                 .expiresAt(Instant.now().plus(Duration.ofMinutes(ttlMin)))
                 .build();
         otpRepo.save(token);
-        sendEmail(user.getEmail(), subject, "Your OTP is: " + otp + " (valid for " + ttlMin + " minutes)");
+        try {
+            sendEmail(user.getEmail(), subject, "Your OTP is: " + otp + " (valid for " + ttlMin + " minutes)");
+        } catch (MailException e) {
+                throw new MailSendException("Failed to send email", e);
+        }
     }
 
     public boolean verifyAndConsume(User user, String otp) {
@@ -55,6 +66,7 @@ public class OtpService {
     }
 
     private void sendEmail(String to, String subject, String body) {
+
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
         msg.setSubject(subject);
