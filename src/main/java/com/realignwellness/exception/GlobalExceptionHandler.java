@@ -61,6 +61,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(BadRequestException ex) {
+        ApiResponse<Void> body = ApiResponse.<Void>builder()
+                .success(false)
+                .code("BAD_REQUEST")
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .data(null)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
         ApiResponse<Void> body = ApiResponse.<Void>builder()
