@@ -8,12 +8,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("instructors")
+@Document("Trainer")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstructorProfile {
+public class TrainerProfile {
     @Id
     private String id;
 

@@ -7,9 +7,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.realignwellness.entity.ClassSchedule;
 
 public interface ClassScheduleRepository extends MongoRepository<ClassSchedule, String> {
-    List<ClassSchedule> findByActiveTrueAndDayOfWeekOrderByStartTimeAsc(String dayOfWeek);
-    List<ClassSchedule> findByActiveTrueOrderByDayOfWeekAscStartTimeAsc();
+    List<ClassSchedule> findByActiveTrueAndDayOfWeekOrderByTimeAsc(String dayOfWeek);
+    List<ClassSchedule> findByActiveTrueOrderByDayOfWeekAscTimeAsc();
     List<ClassSchedule> findByInstructorId(String instructorId);
-    boolean existsByDayOfWeekAndStartTimeAndInstructorIdAndActive(String dayOfWeek, String startTime, String instructorId, boolean active);
+    boolean existsByDayOfWeekAndTimeAndInstructorIdAndActive(String dayOfWeek, String startTime, String instructorId, boolean active);
 }
-

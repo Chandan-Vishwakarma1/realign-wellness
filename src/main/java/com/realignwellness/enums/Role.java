@@ -1,4 +1,4 @@
 package com.realignwellness.enums;
 
 public enum Role {
-    USER, TEACHER, ADMIN }
+    USER, TRAINER, ADMIN }

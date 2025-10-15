@@ -32,9 +32,7 @@ public class ClassSchedule {
 
     // Store as "HH:mm" for sortability and simplicity
     @Indexed
-    private String startTime;
-
-    private String endTime;
+    private String time;
 
     @Indexed
     private boolean active;

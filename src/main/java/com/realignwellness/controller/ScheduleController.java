@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -84,6 +85,31 @@ public class ScheduleController {
                 .success(true).code("DELETED").message("Schedule deleted")
                 .timestamp(Instant.now()).data(null).build();
         return ResponseEntity.ok(body);
+    }
+
+//    @Pattern(regexp="^([01]\\d|2[0-3]):[0-5]\\d$", message="time must be HH:mm")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/availability")
+    public ApiResponse<Map<String,Object>> availability(
+            @RequestParam String day,
+            @RequestParam String time,
+            @RequestParam String instructorId) {
+
+        boolean occupied = service.isOccupied(day, time, instructorId);
+
+        var data = new LinkedHashMap<String,Object>();
+        data.put("day", day.toUpperCase());
+        data.put("time", time);
+        data.put("instructorId", instructorId);
+        data.put("available", !occupied);
+
+        String msg = occupied
+                ? "Instructor is already occupied for the selected slot."
+                : "Instructor is available for the selected slot.";
+
+        return ApiResponse.<Map<String,Object>>builder()
+                .success(true).code("OK").message(msg)
+                .timestamp(Instant.now()).data(data).build();
     }
 }
 

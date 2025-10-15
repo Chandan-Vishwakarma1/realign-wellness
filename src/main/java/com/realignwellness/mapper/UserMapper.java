@@ -1,7 +1,7 @@
 package com.realignwellness.mapper;
 
 import com.realignwellness.dto.RegisterRequestDTO;
-import com.realignwellness.dto.UserProfileDTO;
+import com.realignwellness.dto.UserDTO;
 import com.realignwellness.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +14,5 @@ public interface UserMapper {
     @Mapping(target="updatedAt", expression="java(java.time.Instant.now())")
     User toEntity(RegisterRequestDTO dto);
 
-    UserProfileDTO toProfile(User user);
+    UserDTO toUserDto(User user);
 }

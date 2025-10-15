@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.realignwellness.entity.InstructorProfile;
+import com.realignwellness.entity.TrainerProfile;
 import com.realignwellness.exception.NotFoundException;
 import com.realignwellness.repository.InstructorRepository;
 
@@ -13,22 +13,22 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class InstructorService {
+public class TrainerService {
     private final InstructorRepository repo;
 
-    public List<InstructorProfile> listActive() {
+    public List<TrainerProfile> listActive() {
         return repo.findByActiveTrueOrderByFullNameAsc();
     }
 
-    public InstructorProfile getActiveOrThrow(String id) {
+    public TrainerProfile getActiveOrThrow(String id) {
         return repo.findById(id)
-                .filter(InstructorProfile::isActive)
+                .filter(TrainerProfile::isActive)
                 .orElseThrow(() -> new NotFoundException("Instructor not found or inactive"));
     }
 
-    public InstructorProfile create(String fullName, boolean active) {
+    public TrainerProfile create(String fullName, boolean active) {
         var now = Instant.now();
-        var p = InstructorProfile.builder()
+        var p = TrainerProfile.builder()
                 .fullName(fullName)
                 .active(active)
                 .createdAt(now)
@@ -37,7 +37,7 @@ public class InstructorService {
         return repo.save(p);
     }
 
-    public InstructorProfile update(String id, String fullName, Boolean active) {
+    public TrainerProfile update(String id, String fullName, Boolean active) {
         var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Instructor not found"));
         if (fullName != null && !fullName.isBlank()) p.setFullName(fullName);
         if (active != null) p.setActive(active);

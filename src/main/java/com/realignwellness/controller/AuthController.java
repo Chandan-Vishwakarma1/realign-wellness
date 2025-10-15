@@ -25,10 +25,10 @@ public class AuthController {
     private final UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserProfileDTO>> register(@Valid @RequestBody RegisterRequestDTO dto) {
+    public ResponseEntity<ApiResponse<UserDTO>> register(@Valid @RequestBody RegisterRequestDTO dto) {
         User user = authService.register(dto);
-        UserProfileDTO profile = userMapper.toProfile(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.<UserProfileDTO>builder()
+        UserDTO profile = userMapper.toUserDto(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.<UserDTO>builder()
                 .success(true).code("USER_CREATED").message("User registered").timestamp(Instant.now()).data(profile).build());
     }
 

@@ -6,8 +6,7 @@ import lombok.Data;
 public class ClassScheduleItemDTO {
     private String id;
     private String day;
-    private String startTime;
-    private String endTime;
+    private String time;
     private String className;
     private String instructor;
     private String joinUrl;
