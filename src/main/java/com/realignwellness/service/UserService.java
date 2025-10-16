@@ -3,6 +3,7 @@ package com.realignwellness.service;
 
 import com.realignwellness.dto.UserDTO;
 import com.realignwellness.entity.User;
+import com.realignwellness.exception.BadRequestException;
 import com.realignwellness.mapper.UserMapper;
 import com.realignwellness.repository.UserRepository;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -22,14 +24,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final Set<String> VALID_ROLES = java.util.Set.of("USER", "TRAINER", "ADMIN");
+
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     public Page<UserDTO> getAllUsers(int page, int size, String sortBy) {
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(userMapper::toUserDto);
+    }
 
+    // Get users by role with pagination
+    public Page<UserDTO> getUsersByRole(String role, int page, int size, String sortBy) {
+        String normalizedRole = role.trim().toUpperCase();
+
+        if (!VALID_ROLES.contains(normalizedRole)) {
+            throw new BadRequestException("Invalid role: " + role + ". Valid roles are: USER, TRAINER, ADMIN");
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<User> userPage = userRepository.findByRoles(normalizedRole, pageable);
         return userPage.map(userMapper::toUserDto);
     }
 }

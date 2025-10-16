@@ -17,7 +17,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/instructors")
+@RequestMapping("/api/trainer")
 @RequiredArgsConstructor
 public class TrainerController {
 
@@ -33,7 +33,7 @@ public class TrainerController {
 //                .timestamp(Instant.now()).data(list).build();
 //    }
 
-    @PreAuthorize("hasAnyRole('USER','TEACHER','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','TRAINER','ADMIN')")
     @GetMapping("/active")
     public ApiResponse<List<TrainerProfileDTO>> active() {
         var list = service.listActive().stream().map(mapper::toDto).toList();

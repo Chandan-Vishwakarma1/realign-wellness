@@ -6,6 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.realignwellness.entity.TrainerProfile;
 
-public interface InstructorRepository extends MongoRepository<TrainerProfile, String> {
+public interface TrainerRepository extends MongoRepository<TrainerProfile, String> {
     List<TrainerProfile> findByActiveTrueOrderByFullNameAsc();
 }

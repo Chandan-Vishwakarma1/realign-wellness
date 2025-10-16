@@ -29,7 +29,7 @@ public class ScheduleController {
     private final ClassScheduleService service;
     private final ClassScheduleMapper mapper;
 
-    @PreAuthorize("hasAnyRole('USER','TEACHER','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','TRAINER','ADMIN')")
     @GetMapping
     public ApiResponse<List<ClassScheduleItemDTO>> listByDay(@RequestParam(name = "day", required = false) String day) {
         var list = service.listByDay(day).stream().map(mapper::toItemDTO).toList();

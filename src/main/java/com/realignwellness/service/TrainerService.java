@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 
 import com.realignwellness.entity.TrainerProfile;
 import com.realignwellness.exception.NotFoundException;
-import com.realignwellness.repository.InstructorRepository;
+import com.realignwellness.repository.TrainerRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class TrainerService {
-    private final InstructorRepository repo;
+    private final TrainerRepository repo;
 
     public List<TrainerProfile> listActive() {
         return repo.findByActiveTrueOrderByFullNameAsc();
